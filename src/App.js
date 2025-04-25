@@ -25,11 +25,3 @@ function App() {
 }
 
 export default App;
-import { signOut } from "firebase/auth";
-import { auth } from "../firebase"; // or wherever your firebase.js is
-
-const handleLogout = async () => {
-  await signOut(auth);
-  window.location.href = "/login"; // optional redirect
-};
-
