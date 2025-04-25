@@ -1,4 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase";
+import { useAuth } from "../AuthContext";
 
 const mockData = [
   {
@@ -20,9 +23,25 @@ const mockData = [
 ];
 
 const Dashboard = () => {
+  const { logout, user } = useAuth();
+
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
-      <h1 className="text-2xl font-bold mb-4">Irrixa Irrigation Dashboard</h1>
+      {/* Header with user info + logout */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Irrixa Irrigation Dashboard</h1>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-600">{user?.email}</span>
+          <button
+            onClick={logout}
+            className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+
+      {/* Grid of irrigation blocks */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {mockData.map((block, index) => (
           <div key={index} className="bg-white p-4 rounded-xl shadow-md">
