@@ -1,6 +1,4 @@
-import React, { useEffect } from "react";
-import { signOut } from "firebase/auth";
-import { auth } from "../firebase";
+import React from "react";
 import { useAuth } from "../AuthContext";
 
 const mockData = [
@@ -23,15 +21,14 @@ const mockData = [
 ];
 
 const Dashboard = () => {
-  const { logout, user } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
-    <div className="p-4 bg-gray-100 min-h-screen">
-      {/* Header with user info + logout */}
+    <div className="p-6 bg-gray-100 min-h-screen">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Irrixa Irrigation Dashboard</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">{user?.email}</span>
+        <h1 className="text-2xl font-bold">Irrixa Dashboard</h1>
+        <div className="flex gap-4 items-center">
+          <span className="text-gray-700">{user?.email}</span>
           <button
             onClick={logout}
             className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800"
@@ -41,12 +38,11 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Grid of irrigation blocks */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {mockData.map((block, index) => (
           <div key={index} className="bg-white p-4 rounded-xl shadow-md">
             <h2 className="font-semibold text-lg mb-2">{block.block}</h2>
-            <p>💧 Irrigation: {block.irrigation_mm} mm ({block.irrigation_minutes} min)</p>
+            <p>💧 {block.irrigation_mm} mm ({block.irrigation_minutes} min)</p>
             <p>🌿 NDVI: {block.ndvi}</p>
             <p>📈 Kc: {block.kc}</p>
             <p>☀️ ETo: {block.eto} mm</p>
@@ -58,3 +54,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
