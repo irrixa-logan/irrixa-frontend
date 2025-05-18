@@ -1,6 +1,5 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
 
 type IrrigationResult = {
   block: string
@@ -13,20 +12,17 @@ type IrrigationResult = {
   crop_stage?: string
 }
 
-const cropTypes = ['beans', 'broccoli', 'citrus', 'almonds', 'grapes', 'unknown']
-const cropStages = ['seeding', 'vegetative', 'flowering', 'fruiting', 'maturity', 'unspecified']
-
 export default function BlocksPage() {
   const [irrigation, setIrrigation] = useState<IrrigationResult[]>([])
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch('https://irrixa-backend-2g4t.onrender.com/api/irrigation-results')
+        const res = await fetch("https://irrixa-backend-2g4t.onrender.com/api/irrigation-results")
         const data = await res.json()
         setIrrigation(data)
       } catch (err) {
-        console.error('Failed to fetch irrigation data', err)
+        console.error("Failed to fetch irrigation data", err)
       }
     }
     fetchData()
@@ -34,57 +30,71 @@ export default function BlocksPage() {
 
   const updateField = (index: number, field: keyof IrrigationResult, value: string) => {
     const newData = [...irrigation]
-    newData[index][field] = value
+    // Convert value to correct type if needed
+    if (field === 'confidence_score' || field === 'etc' || field === 'rain_mm' || field === 'irrigation_mm') {
+      // @ts-ignore
+      newData[index][field] = parseFloat(value)
+    } else if (field === 'stress_flag') {
+      // @ts-ignore
+      newData[index][field] = value === 'true'
+    } else {
+      // @ts-ignore
+      newData[index][field] = value
+    }
     setIrrigation(newData)
   }
 
   return (
     <main className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Irrigation Results</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {irrigation.map((block, i) => (
-          <div key={i} className="border p-4 rounded shadow space-y-2">
-            <input
-              className="font-bold text-lg w-full border rounded p-1"
-              value={block.block}
-              onChange={(e) => updateField(i, 'block', e.target.value)}
-            />
-            <div>
-              <label className="text-sm text-gray-600">Crop:</label>
+      <h1 className="text-3xl font-bold mb-4">Irrigation Results</h1>
+      {irrigation.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {irrigation.map((block, i) => (
+            <div key={i} className="border p-4 rounded shadow space-y-2">
+              <label className="block font-semibold">Block Name</label>
+              <input
+                className="border p-2 w-full"
+                value={block.block}
+                onChange={(e) => updateField(i, 'block', e.target.value)}
+              />
+              <div><strong>ETc:</strong> {block.etc} mm</div>
+              <div><strong>Rain:</strong> {block.rain_mm} mm</div>
+              <div><strong>Irrigation:</strong> {block.irrigation_mm} mm</div>
+              <div><strong>Confidence:</strong> {block.confidence_score}%</div>
+              <div><strong>Stress:</strong> {block.stress_flag ? 'Yes' : 'No'}</div>
+
+              <label className="block font-semibold">Crop</label>
               <select
-                className="w-full border rounded p-1"
-                value={block.crop || 'unknown'}
+                className="border p-2 w-full"
+                value={block.crop || ''}
                 onChange={(e) => updateField(i, 'crop', e.target.value)}
               >
-                {cropTypes.map((crop) => (
-                  <option key={crop} value={crop}>
-                    {crop}
-                  </option>
-                ))}
+                <option value="">Select crop</option>
+                <option value="green beans">Green Beans</option>
+                <option value="broccoli">Broccoli</option>
+                <option value="citrus">Citrus</option>
+                <option value="almonds">Almonds</option>
+                <option value="grapes">Grapes</option>
               </select>
-            </div>
-            <div>
-              <label className="text-sm text-gray-600">Crop Stage:</label>
+
+              <label className="block font-semibold">Crop Stage</label>
               <select
-                className="w-full border rounded p-1"
-                value={block.crop_stage || 'unspecified'}
+                className="border p-2 w-full"
+                value={block.crop_stage || ''}
                 onChange={(e) => updateField(i, 'crop_stage', e.target.value)}
               >
-                {cropStages.map((stage) => (
-                  <option key={stage} value={stage}>
-                    {stage}
-                  </option>
-                ))}
+                <option value="">Select stage</option>
+                <option value="emergence">Emergence</option>
+                <option value="flowering">Flowering</option>
+                <option value="pod fill">Pod Fill</option>
+                <option value="maturity">Maturity</option>
               </select>
             </div>
-            <p><strong>ETc:</strong> {block.etc} mm</p>
-            <p><strong>Rain:</strong> {block.rain_mm} mm</p>
-            <p><strong>Irrigation:</strong> {block.irrigation_mm} mm</p>
-            <p><strong>Confidence:</strong> {block.confidence_score}%</p>
-            <p><strong>Stress:</strong> {block.stress_flag ? 'Yes' : 'No'}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <p>Loading irrigation data...</p>
+      )}
     </main>
   )
 }
